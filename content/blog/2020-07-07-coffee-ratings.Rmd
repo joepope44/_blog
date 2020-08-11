@@ -1,0 +1,346 @@
+---
+title: "Coffee Ratings"
+author: "Joseph Pope"
+date: '2020-07-07'
+description: "TidyTuesday project modelling coffee ratings"
+publishDate: '2020-07-07T08:23:44-04:00'
+slug: coffee-ratings
+tags: ["recipes", "tidymodels", "tidyverse"]
+categories: ["R"]
+images:
+  - src: "img/2020/tidytuesday/small_coffee.jpg"
+    alt: "Giant Cup O' Joe"
+---
+
+A TidyTuesday project modelling coffee ratings predictions
+<!--more-->
+
+
+# Intro 
+
+Today I am going to explore Coffee Ratings for this week's Tidy Tuesday challenge. The data comes from the [Coffee Quality Database](https://github.com/jldbc/coffee-quality-database). The great thing about Tidy Tuesday is that we can do whatever we want with the data. There are no rules or directions! 
+
+This data is very interesting with many features and looks ripe for a predictive model. I can use the various ratings provided to predict either a quantitative method, like what the 'total_cup_score' (Overall rating) is, or a qualitative measure, like what species of bean (Arabica or Robusta) or perhaps the country of origin. 
+
+Predicting scores strikes me as a classic regression problem, best tackled by linear models or random forests, and classification could be solved with logistic regression, Naive Bayes, SVM or even neural networks. I've NEVER used `tidymodels` before, so let's give it a go, make some mistakes, and see what we can learn. 
+
+But first, some brief background of our data from the TidyTuesday repo: 
+
+>There is data for both Arabica and Robusta beans, across many countries and professionally rated on a 0-100 scale. All sorts of scoring/ratings for things like acidity, sweetness, fragrance, balance, etc - may be useful for either separating into visualizations/categories or for modeling/recommenders.  
+
+>Wikipedia on Coffee Beans:  
+
+> The two most economically important varieties of coffee plant are the Arabica and the Robusta; ~60% of the coffee produced worldwide is Arabica and ~40% is Robusta. Arabica beans consist of 0.8–1.4% caffeine and Robusta beans consist of 1.7–4% caffeine.
+
+Setup 
+```{r setup}
+library(tidytuesdayR)
+library(tidyverse)
+library(tidymodels)
+library(knitr)
+library(kableExtra)
+
+knitr::opts_chunk$set(
+	fig.height = 5,
+	fig.width = 8,
+	message = FALSE,
+	warning = FALSE,
+	dpi = 180,
+	include = TRUE
+)
+```
+
+Load the data 
+```{r load_data, echo=TRUE, results = 'hide'}
+tuesdata <- tidytuesdayR::tt_load(2020, week = 28)
+coffee_ratings <- tuesdata$coffee_ratings
+```
+
+# EDA 
+
+Now that we have our data and let's dive in. Let's review the summary statistics with skimr.  
+
+``` {r skim}
+coffee_ratings %>% 
+  skimr::skim()
+```
+
+# Check Initial Assumptions 
+
+I originally wanted to predict "total_cup_points". However, after some review it appears that this field is simply the sum of ten other ratings, from aroma to cupper_points. What I really want to predict is Cupper Points. This is the reviewer's (aka the Cupper's) personal overall rating for the cup of joe. I can use this as dependant variable in a regression analysis. This should help me identify which features (aroma, acidity, elevation, country of origin?) influence the final rating the most. 
+
+# Potential Features
+
+Before we dig further into the data, let's speculate what might factors go into a superior coffee bean. If coffee is like wine, then perhaps region (lat, long, altitude, preciptation, average hours of sunlight, etc) makes a big difference. Perhaps certain companies utilize best practices and farming techniques. Maybe certain processing methods are better than others. We are given the testing date and the expiration date, so we can add a feature that measures how fresh the beans are. These features and more could be really important or totally useless. I have no idea! Let's see what the data has to say about it.  
+
+The wiki in the readme suggests that coffee beans are split 60/40 worldwide, by Arabica and Robusta. However, for this analysis the split is much more imbalanced. I thought it would be very interesting to build an Arabica vs. Robusta classifier but with such an imbalanced set I don't think upsampling or other methods will be enough to build a robust model. 
+
+```{r species}
+table(coffee_ratings$species)
+```
+
+Let's take a peak at the distribution of country of origin field. It is mentioned in the articles that Ethiopia wins top prize, however most of the coffees are from Central and South America.  
+```{r top 10 countries}
+coffee_ratings %>% 
+  group_by(country_of_origin) %>% 
+  tally() %>% 
+  top_n(., 10) %>% 
+  arrange(desc(n))
+```
+
+Let's pull this list of top 10 countries into a list to reference later. 
+```{r top 10 list}
+top_countries <- coffee_ratings %>% 
+  group_by(country_of_origin) %>% 
+  tally() %>% 
+  top_n(., 10) %>% 
+  arrange(desc(n)) %>% 
+  pull(country_of_origin)
+```
+
+
+Out of curiousity, let's see the count of coffee bean color. This was news to me, but apparently coffee beans are mostly blue or green in color when fresh. It is only after roasting that the color darkens to that familiar, uh, "coffee-brown" color. If you learn nothing else today, you can at least learn this.  
+
+![The Coffee Bean Spectrum](https://theroasterie.com/wp-content/uploads/download.jpg)
+
+```{r coffee color}
+table(coffee_ratings$color)
+```
+
+Robusta is seen below with a higher modal peak, suggesting the species, known for its higher caffeine levels, is rated higher than Arabica. This could be due to a small sample size though. 
+
+```{r density plots}
+coffee_ratings %>% 
+  mutate(id = row_number()) %>% 
+  select(id, species, cupper_points) %>% 
+  ggplot(aes(cupper_points, fill = species)) +
+  geom_density(alpha = 0.1)
+  # geom_histogram(position = "identity", alpha = 0.7, show.legend = FALSE)
+
+```
+
+# TIDYMODELS
+
+I have never used tidymodels, so let's see how this goes. Let's try to tackle the regression model first. From the skim package, we know we have no missing values or junky data for this. Nice! 
+
+First thing to do is narrow our data and make it ripe for modeling. TidyTuesday mentions that Yorgos Askalidis already determined that altitude, processing_method and color have no bearing to the cupping score, and I think that makes sense. I will omit those features for now. That leaves us with species, country of origin and several ratings and measurements of the coffee samples. I am going to take the top ten countries only (out of 36 in the data) and lump the rest into "Other" with forcats. This is simply to speed up the processing without losing too much information gain for the feature. 
+
+> Note - I went back after trying the models a few times and removed 'species'. In this smaller, filtered dataset there are only 3 records with Robusta coffee beans. It caused me some issues, and with only 3 members of the minority class, I decided to just remove it completely.
+
+```{r first pass of processing}
+
+coffee <- coffee_ratings %>%
+  mutate(id = row_number()) %>% # add ID field, convert NA to Other
+  select(id, country_of_origin, variety, aroma:moisture) %>% # select features
+  mutate(country_of_origin = case_when(
+    country_of_origin %in% top_countries ~ country_of_origin,
+    TRUE ~ "Other"
+  )) %>%
+  mutate_if(is.character, as.factor) %>% # convert country and variety to factors
+  filter(cupper_points != 0) %>% # remove 0 point scores as junk data
+  drop_na() # drop NA for country and variety fields. only affects 200 records
+```
+
+Split the data 
+
+> Note - I initially tried to stratify by species, even though there aren't many Robusta coffee samples in the data. I ended up removing this due to the severe class imbalance. It may have been worth the effort to upsample Robusta and then stratify by species. 
+
+```{r split train and test data}
+set.seed(1234)
+
+coffee_split <- coffee %>% 
+  initial_split()
+
+coffee_train <- training(coffee_split)
+coffee_test <- testing(coffee_split)
+```
+
+Naive linear model with no scaling or pre-processing 
+```{r linear model engine}
+lm_spec <- linear_reg() %>%
+  set_engine(engine = "lm")
+
+lm_spec
+## Linear Regression Model Specification (regression)
+##
+## Computational engine: lm
+lm_fit <- lm_spec %>%
+  fit(cupper_points ~ .,
+    data = coffee_train
+  )
+
+lm_fit
+```
+
+
+```{r random forest engine}
+library(ranger)
+
+rf_spec <- rand_forest(mode = "regression") %>%
+  set_engine("ranger")
+
+rf_spec
+## Random Forest Model Specification (regression)
+##
+## Computational engine: ranger
+rf_fit <- rf_spec %>%
+  fit(cupper_points ~ .,
+    data = coffee_train
+  )
+
+rf_fit
+```
+
+Both models produce a hefty R squared, > .7! This makes me nervous as it's likely too good to be true (overfit). I know that I skipped some preprocessing steps just to see how these models worked, so let's go back and see if some `recipes` can bring my models back down to earth. 
+
+# Preprocessing With Recipes
+
+1) Let's create a bland, vanilla recipe to start off 
+
+```{r receipe object}
+
+rec_obj <- recipe(cupper_points ~ ., data = coffee_train) %>% 
+  update_role(id, new_role = "ID") %>% 
+  step_normalize(all_predictors(), -all_nominal()) %>% 
+  step_dummy(all_nominal())
+
+summary(rec_obj)
+
+```
+
+I tell the recipe not to use the "id" column in the analysis and we can see that it is classified as a "ID" and not "predictor". I run summary on the recipe object and can see the type of role the variables have, as well as the type. It is important to note that 'nominal' is yet another term to describe a factor/string/non-numeric. 
+
+Then I use the step_* functions to normalize the data (it centers and scales numerical features) and to create dummy variables for all of my nominal (non-numeric) features. 
+
+So we built our recipe. Next step is to prep and juice. I'm getting thirsty.  
+
+```{r juice}
+
+coff_train <- juice(prep(rec_obj))
+
+dim(coff_train)
+
+names(coff_train)
+
+coff_train
+```
+
+Baking applies the pre-processing steps that were 'juiced' above to the test data. This way, the train and test data will have the same pre-processing steps (aka recipe) applied to them. Clever! 
+
+```{r bake}
+
+coff_test <- rec_obj %>%
+  prep() %>% 
+  bake(coffee_test) 
+
+```
+
+So now we see all our predictors including all the dummy variables that were generated. Neat.  
+
+# Better, Faster, Stronger
+
+Now we can go back to the linear and random forest regression models used earlier, but now substitute the data with better processing. I think I see why they went with the "recipe" motif! Like baking, I can swap in ingredients without having to start over from scratch.  
+
+```{r better version of linear model}
+lm_fit1 <- fit(lm_spec, cupper_points ~ ., coff_train)
+glance(lm_fit1$fit)
+```
+
+```{r lm statistic}
+tidy(lm_fit1) %>% 
+  arrange(desc(abs(statistic)))
+```
+
+
+```{r lm predicted}
+lm_predicted <- augment(lm_fit1$fit, data = coff_train) 
+select(lm_predicted, id, cupper_points, .fitted:.std.resid)
+```
+
+```{r plot lm residuals}
+ggplot(lm_predicted, aes(.fitted, cupper_points)) +
+  geom_point(alpha = .2) +
+  ggrepel::geom_label_repel(aes(label = id),
+                            data = filter(lm_predicted, abs(.resid) > 2)) +
+  labs(title = "Linear Model: Actual vs. Predicted Cupper Points") +
+  geom_smooth()
+```
+
+Whoa, what's up with coffee sample 963? We predicted a score of 7.4 or so, and the real score was a 5.25. This appears just to be a major outlier, so we can likely ignore. 
+
+```{r outlier analysis}
+
+filter(coffee, id == 963)
+
+```
+
+Now let's repeat for the random forest model. Note - `glance` does not work for ranger objects like rf_fit1$fit. 
+
+```{r random_forest take2}
+rf_fit1 <- fit(rf_spec, cupper_points ~ ., coff_train)
+rf_fit1$fit
+```
+
+```{r}
+rf_predicted <- bind_cols(.fitted = rf_fit1$fit$predictions, data = coff_train)
+select(rf_predicted, id, cupper_points, .fitted)
+
+ggplot(rf_predicted, aes(.fitted, cupper_points)) +
+  geom_point(alpha = .2) +
+  # ggrepel::geom_label_repel(aes(label = id),
+  #                           data = filter(rf_predicted, abs(.resid) > 2)) +
+  labs(title = "Random Forest: Actual vs. Predicted Cupper Points") +
+  geom_smooth()
+```
+
+
+```{r}
+results_train <- lm_fit1 %>%
+  predict(new_data = coff_train) %>%
+  mutate(
+    truth = coff_train$cupper_points,
+    model = "lm"
+  ) %>% 
+bind_rows(rf_fit1 %>%
+    predict(new_data = coff_train) %>%
+    mutate(
+      truth = coff_train$cupper_points,
+      model = "rf"
+    ))
+```
+
+```{r}
+results_train %>%
+  group_by(model) %>%
+  rmse(truth = truth, estimate = .pred)
+```
+
+Apply model to the test set
+```{r}
+
+lm_fit1 %>%
+  predict(coff_test) %>%
+  bind_cols(coff_test) %>%
+  metrics(truth = cupper_points,
+          estimate = .pred) %>%
+  bind_cols(model = "lm") %>% 
+  bind_rows(
+    rf_fit1 %>%
+      predict(coff_test) %>%
+      bind_cols(coff_test) %>%
+      metrics(truth = cupper_points,
+        estimate = .pred
+      ) %>% 
+  bind_cols(model = "rf")
+  )
+
+
+```
+
+We see that the random forest and linear model are both very close together in performance. However, the random forest does have a small RMSE and higher R squared, which means it does a slightly better job explaining the variance and has less overall error in predicting the ratings. 
+
+# Next Steps 
+
+I did all of this analysis without knowing anything about tidymodels. Additionally, I am fairly new to using R for predicting values as well. It would be interesting to see how these models perform with cross-validation, optimized parameters and better feature selection. 
+
+The concept of a "recipe" which you can modify and reuse is incredibly interesting in this context. I have a lot more to learn here, and would direct readers to the great YouTube videos made by [Julia Silge](https://www.youtube.com/channel/UCTTBgWyJl2HrrhQOOc710kA). 
