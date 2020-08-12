@@ -17,9 +17,10 @@ removeBlur: no
 
 
 <p>Today we are looking at text data from the scripts for the TV show ‘Avatar: The Last Airbender’.</p>
-<p>I decided to see if certain characters that dominate a show affect the ratings in a postive or negative way. I am only going to use word count, as that’s all I have, but it would be interesting to incorporate screen time as well.</p>
-<p>Below I walk through counting words per each episode, counting words per each character per episode, and then capturing that percentage.</p>
-<p>First we setup our enivronment.</p>
+<p>I decided to see if certain characters that dominate a show, based on their word count, affects the ratings in a postive or negative way. It would be interesting to incorporate screen time as well, but all I have here is word count.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>First we setup our enivronment and load the dataset.</p>
 <pre class="r"><code>library(tidytuesdayR)
 library(tidyverse)</code></pre>
 <pre><code>## ── Attaching packages ────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
@@ -49,10 +50,18 @@ library(kableExtra)</code></pre>
 <pre><code>## 
 ##  Downloading file 1 of 2: `avatar.csv`
 ##  Downloading file 2 of 2: `scene_description.csv`</code></pre>
+</div>
+<div id="data-manipulation-and-cleanup" class="section level2">
+<h2>Data Manipulation and Cleanup</h2>
 <p>Next we create dataframes to capture the text data for all characters, the totals per episode, then join them.</p>
 <p>Create list of top 6 characters by word count. We will only plot these characters as they have the most words compared to the other characters.</p>
-<p>Below is a first crack. I create a scatter plot and then use an ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved.</p>
+<p>Below is a first crack. I create a scatter plot and then use stat_ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved, but it might be interesting to see how character’s evolve over the arc of the entire series.</p>
 <p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-4-1.png" width="1440" /></p>
-<p>Now let’s make the plot pretty. Notice how we can use the group.colors named list to dictate who gets assigned which color. Neat!</p>
+<p>Now let’s make the plot pretty.</p>
+<blockquote>
+<p>Notice we can use the group.colors named list to dictate who gets assigned which color. Neat!</p>
+</blockquote>
 <p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-5-1.png" width="1440" /></p>
-<p>I use a density 2D plot to help show how the points are distributed. I don’t think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings.</p>
+<p>I use a density 2D plot to help show how the points are distributed.</p>
+<p>I don’t think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings.</p>
+</div>

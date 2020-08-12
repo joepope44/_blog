@@ -16,11 +16,11 @@ removeBlur: no
 
 Today we are looking at text data from the scripts for the TV show 'Avatar: The Last Airbender'. 
 
-I decided to see if certain characters that dominate a show affect the ratings in a postive or negative way. I am only going to use word count, as that's all I have, but it would be interesting to incorporate screen time as well. 
+I decided to see if certain characters that dominate a show, based on their word count, affects the ratings in a postive or negative way. It would be interesting to incorporate screen time as well, but all I have here is word count. 
 
-Below I walk through counting words per each episode, counting words per each character per episode, and then capturing that percentage. 
+## Setup
 
-First we setup our enivronment. 
+First we setup our enivronment and load the dataset. 
 ```{r setup}
 library(tidytuesdayR)
 library(tidyverse)
@@ -43,6 +43,8 @@ Load the data
 tuesdata <- tidytuesdayR::tt_load(2020, week = 33)
 avatar <- tuesdata$avatar
 ```
+
+## Data Manipulation and Cleanup
 
 Next we create dataframes to capture the text data for all characters, the totals per episode, then join them. 
 
@@ -80,7 +82,7 @@ top_chars <- df %>%
 
 ```
 
-Below is a first crack. I create a scatter plot and then use an ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved. 
+Below is a first crack. I create a scatter plot and then use stat_ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved, but it might be interesting to see how character's evolve over the arc of the entire series. 
 
 ```{r}
 df %>% 
@@ -91,7 +93,9 @@ df %>%
   facet_wrap(~ character)
 ```
 
-Now let's make the plot pretty. Notice how we can use the group.colors named list to dictate who gets assigned which color. Neat! 
+Now let's make the plot pretty. 
+
+> Notice we can use the group.colors named list to dictate who gets assigned which color. Neat! 
 
 ```{r}
 library(ggtext)
@@ -125,5 +129,7 @@ p <- df %>%
 p
 ```
 
-I use a density 2D plot to help show how the points are distributed. I don't think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings. 
+I use a density 2D plot to help show how the points are distributed. 
+
+I don't think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings. 
 

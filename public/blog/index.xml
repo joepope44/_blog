@@ -18,8 +18,8 @@
       
       <guid>/blog/avatar-the-last-airbender/</guid>
       <description>Today we are looking at text data from the scripts for the TV show ‘Avatar: The Last Airbender’.
-I decided to see if certain characters that dominate a show affect the ratings in a postive or negative way. I am only going to use word count, as that’s all I have, but it would be interesting to incorporate screen time as well.
-Below I walk through counting words per each episode, counting words per each character per episode, and then capturing that percentage.</description>
+I decided to see if certain characters that dominate a show, based on their word count, affects the ratings in a postive or negative way. It would be interesting to incorporate screen time as well, but all I have here is word count.
+Setup First we setup our enivronment and load the dataset.</description>
     </item>
     
     <item>
