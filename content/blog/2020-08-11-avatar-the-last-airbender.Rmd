@@ -28,27 +28,27 @@ library(knitr)
 library(kableExtra)
 
 knitr::opts_chunk$set(
+	echo = FALSE,
 	fig.height = 5,
 	fig.width = 8,
 	message = FALSE,
 	warning = FALSE,
-	dpi = 180,
-	include = TRUE
+	dpi = 180
 )
 ```
 
 
 Load the data 
-```{r load_data, echo=TRUE, results = 'hide'}
-# tuesdata <- tidytuesdayR::tt_load(2020, week = 33)
-# avatar <- tuesdata$avatar
+```{r}
+tuesdata <- tidytuesdayR::tt_load(2020, week = 33)
+avatar <- tuesdata$avatar
 ```
 
 Next we create dataframes to capture the text data for all characters, the totals per episode, then join them. 
 
 ```{r}
 word_counts <- avatar %>% 
-  filter(character != "Scene Description") %>% 
+  filter(character != "Scene Description") %>% # removes non-character speaking text
   select(book, book_num, chapter_num, character, character_words, imdb_rating) %>% 
   mutate(word_counts = str_count(character_words)) %>% 
   group_by(book_num, chapter_num, character) %>% 
@@ -66,8 +66,6 @@ df <- word_counts %>%
   left_join(word_totals) %>% 
   mutate(word_perc = word_counts / total_words) %>% 
   arrange(book_num, chapter_num, -word_perc)
-
-
 ```
 
 Create list of top 6 characters by word count. We will only plot these characters as they have the most words compared to the other characters. 
@@ -93,21 +91,20 @@ df %>%
   facet_wrap(~ character)
 ```
 
-# Make the plot pretty 
+Now let's make the plot pretty. Notice how we can use the group.colors named list to dictate who gets assigned which color. Neat! 
 
 ```{r}
 library(ggtext)
-library(extrafont)
 
 group.colors <- c(Sokka = "#1C3F6E", Aang = "#EFFC93", Katara = "#0F2347", Iroh = "#a10000", Zuko = "#a10000", Toph = "#80C271") 
 
-df %>% 
+p <- df %>% 
   filter(character %in% top_chars) %>% 
   ggplot(aes(rating, word_perc)) +
   geom_point(aes(color = character), alpha = 1, show.legend = FALSE) + 
   stat_density_2d(alpha = .2, show.legend = FALSE) + 
   scale_color_manual(values = group.colors) +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   facet_wrap(~ character) + 
   theme_minimal() + 
   labs(
@@ -125,8 +122,8 @@ df %>%
     strip.text = element_text(face = "bold")
     )
 
+p
 ```
 
-
-
+I use a density 2D plot to help show how the points are distributed. I don't think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings. 
 
