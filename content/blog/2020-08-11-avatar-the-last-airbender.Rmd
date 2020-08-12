@@ -1,0 +1,132 @@
+---
+title: 'Avatar: The Last Airbender'
+author: Joseph Pope
+date: '2020-08-11'
+slug: avatar-the-last-airbender
+categories:
+  - R
+tags:
+  - tidyverse
+comments: yes
+description: 'A TidyTuesday project modelling Avatar TV show scripts.'
+images: 
+  -  src: 'img/2020/tidytuesday/avatar.jpg'
+removeBlur: no
+---
+
+Today we are looking at text data from the scripts for the TV show 'Avatar: The Last Airbender'. 
+
+I decided to see if certain characters that dominate a show affect the ratings in a postive or negative way. I am only going to use word count, as that's all I have, but it would be interesting to incorporate screen time as well. 
+
+Below I walk through counting words per each episode, counting words per each character per episode, and then capturing that percentage. 
+
+First we setup our enivronment. 
+```{r setup}
+library(tidytuesdayR)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+
+knitr::opts_chunk$set(
+	fig.height = 5,
+	fig.width = 8,
+	message = FALSE,
+	warning = FALSE,
+	dpi = 180,
+	include = TRUE
+)
+```
+
+
+Load the data 
+```{r load_data, echo=TRUE, results = 'hide'}
+# tuesdata <- tidytuesdayR::tt_load(2020, week = 33)
+# avatar <- tuesdata$avatar
+```
+
+Next we create dataframes to capture the text data for all characters, the totals per episode, then join them. 
+
+```{r}
+word_counts <- avatar %>% 
+  filter(character != "Scene Description") %>% 
+  select(book, book_num, chapter_num, character, character_words, imdb_rating) %>% 
+  mutate(word_counts = str_count(character_words)) %>% 
+  group_by(book_num, chapter_num, character) %>% 
+  summarise(word_counts = sum(word_counts), 
+            rating = mean(imdb_rating)) %>% 
+  ungroup()
+
+
+word_totals <- word_counts %>% 
+  group_by(book_num, chapter_num) %>% 
+  summarise(total_words = sum(word_counts)) %>% 
+  ungroup()
+
+df <- word_counts %>% 
+  left_join(word_totals) %>% 
+  mutate(word_perc = word_counts / total_words) %>% 
+  arrange(book_num, chapter_num, -word_perc)
+
+
+```
+
+Create list of top 6 characters by word count. We will only plot these characters as they have the most words compared to the other characters. 
+
+```{r}
+top_chars <- df %>% 
+  group_by(character) %>% 
+  summarise(char_word_counts = sum(word_counts)) %>% 
+  arrange(desc(char_word_counts)) %>% 
+  top_n(6, char_word_counts) %>% 
+  pull(character)
+
+```
+
+Below is a first crack. I create a scatter plot and then use an ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved. 
+
+```{r}
+df %>% 
+  filter(character %in% top_chars) %>% 
+  ggplot(aes(rating, word_perc)) +
+  geom_point() +
+  stat_ellipse() +
+  facet_wrap(~ character)
+```
+
+# Make the plot pretty 
+
+```{r}
+library(ggtext)
+library(extrafont)
+
+group.colors <- c(Sokka = "#1C3F6E", Aang = "#EFFC93", Katara = "#0F2347", Iroh = "#a10000", Zuko = "#a10000", Toph = "#80C271") 
+
+df %>% 
+  filter(character %in% top_chars) %>% 
+  ggplot(aes(rating, word_perc)) +
+  geom_point(aes(color = character), alpha = 1, show.legend = FALSE) + 
+  stat_density_2d(alpha = .2, show.legend = FALSE) + 
+  scale_color_manual(values = group.colors) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  facet_wrap(~ character) + 
+  theme_minimal() + 
+  labs(
+    x = "IMDB Rating",
+    y = "",
+    title = "<span style='color:#a10000'>**Zuko**</span>-heavy Episodes Maintain High Ratings", 
+    subtitle = "Character Word Count / Total Word Count Per Each Episode", 
+    caption = "Joseph Pope | @joepope44"
+    ) + 
+  theme(
+    text = element_text(family = "Verdana"),
+    panel.background = element_rect(fill = "lightgrey"), 
+    panel.grid = element_blank(),
+    plot.title = element_markdown(size = 20),
+    strip.text = element_text(face = "bold")
+    )
+
+```
+
+
+
+

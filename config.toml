@@ -1,6 +1,6 @@
 # For a description of these parameters, please visit the theme wiki.
 # https://github.com/pacollins/hugo-future-imperfect-slim/wiki/config.toml
-baseurl                 = "/"
+baseurl                 = "https://joseph-pope.netlify.app/"
 DefaultContentLanguage  = "en"
 title                   = "@joepope44"
 theme                   = "hugo-future-imperfect-slim"
@@ -50,7 +50,7 @@ enableEmoji             = true
 
   [params.intro]
     header                = "Data Science :: Analytics :: Visualizations"
-    paragraph             = "By <a href='https://github.com/joepope44/'>Joseph Pope</a>."
+    paragraph             = "By Joseph Pope"
     rssIntro              = true
     socialIntro           = true
     hideWhenSingleColumn  = false
@@ -63,7 +63,7 @@ enableEmoji             = true
       alt                 = ""
 
   [params.sidebar]
-    about               = "Built by blogdown and Future Imperfect Slim theme."
+    about               = "BI and Data Science Content"
     postAmount          = 5
     categories          = true
     categoriesByCount   = true
