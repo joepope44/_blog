@@ -21,14 +21,14 @@ I decided to see if certain characters that dominate a show, based on their word
 ## Setup
 
 First we setup our enivronment and load the dataset. 
-```{r setup}
+```{r}
 library(tidytuesdayR)
 library(tidyverse)
 library(knitr)
 library(kableExtra)
 
 knitr::opts_chunk$set(
-	echo = FALSE,
+	echo = TRUE,
 	fig.height = 5,
 	fig.width = 8,
 	message = FALSE,
@@ -40,8 +40,7 @@ knitr::opts_chunk$set(
 
 Load the data 
 ```{r}
-tuesdata <- tidytuesdayR::tt_load(2020, week = 33)
-avatar <- tuesdata$avatar
+avatar <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv')
 ```
 
 ## Data Manipulation and Cleanup

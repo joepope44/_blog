@@ -10,7 +10,7 @@
 <meta itemprop="description" content="A TidyTuesday project modelling Avatar TV show scripts.">
 <meta itemprop="datePublished" content="2020-08-11T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2020-08-11T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="368">
+<meta itemprop="wordCount" content="577">
 <meta itemprop="image" content="">
 
 
@@ -250,7 +250,7 @@
   <div class="meta">
     <time datetime="2020-08-11 00:00:00 &#43;0000 UTC">August 11, 2020</time>
     <p>Joseph Pope</p>
-    <p>2-Minute Read</p>
+    <p>3-Minute Read</p>
   </div>
 </header>
 
@@ -329,7 +329,7 @@ library(kableExtra)</code></pre>
 ## 
 ##     group_rows</code></pre>
 <pre class="r"><code>knitr::opts_chunk$set(
-    echo = FALSE,
+    echo = TRUE,
     fig.height = 5,
     fig.width = 8,
     message = FALSE,
@@ -337,21 +337,79 @@ library(kableExtra)</code></pre>
     dpi = 180
 )</code></pre>
 <p>Load the data</p>
-<pre><code>## 
-##  Downloading file 1 of 2: `avatar.csv`
-##  Downloading file 2 of 2: `scene_description.csv`</code></pre>
+<pre class="r"><code>avatar &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-11/avatar.csv&#39;)</code></pre>
 </div>
 <div id="data-manipulation-and-cleanup" class="section level2">
 <h2>Data Manipulation and Cleanup</h2>
 <p>Next we create dataframes to capture the text data for all characters, the totals per episode, then join them.</p>
+<pre class="r"><code>word_counts &lt;- avatar %&gt;% 
+  filter(character != &quot;Scene Description&quot;) %&gt;% # removes non-character speaking text
+  select(book, book_num, chapter_num, character, character_words, imdb_rating) %&gt;% 
+  mutate(word_counts = str_count(character_words)) %&gt;% 
+  group_by(book_num, chapter_num, character) %&gt;% 
+  summarise(word_counts = sum(word_counts), 
+            rating = mean(imdb_rating)) %&gt;% 
+  ungroup()
+
+
+word_totals &lt;- word_counts %&gt;% 
+  group_by(book_num, chapter_num) %&gt;% 
+  summarise(total_words = sum(word_counts)) %&gt;% 
+  ungroup()
+
+df &lt;- word_counts %&gt;% 
+  left_join(word_totals) %&gt;% 
+  mutate(word_perc = word_counts / total_words) %&gt;% 
+  arrange(book_num, chapter_num, -word_perc)</code></pre>
 <p>Create list of top 6 characters by word count. We will only plot these characters as they have the most words compared to the other characters.</p>
+<pre class="r"><code>top_chars &lt;- df %&gt;% 
+  group_by(character) %&gt;% 
+  summarise(char_word_counts = sum(word_counts)) %&gt;% 
+  arrange(desc(char_word_counts)) %&gt;% 
+  top_n(6, char_word_counts) %&gt;% 
+  pull(character)</code></pre>
 <p>Below is a first crack. I create a scatter plot and then use stat_ellipse to get a rough idea of the distribution and centroid for each character. Each point is an episode. I ignore which book/season of the series is involved, but it might be interesting to see how character’s evolve over the arc of the entire series.</p>
-<p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-4-1.png" width="1440" /></p>
+<pre class="r"><code>df %&gt;% 
+  filter(character %in% top_chars) %&gt;% 
+  ggplot(aes(rating, word_perc)) +
+  geom_point() +
+  stat_ellipse() +
+  facet_wrap(~ character)</code></pre>
+<p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-5-1.png" width="1440" /></p>
 <p>Now let’s make the plot pretty.</p>
 <blockquote>
 <p>Notice we can use the group.colors named list to dictate who gets assigned which color. Neat!</p>
 </blockquote>
-<p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-5-1.png" width="1440" /></p>
+<pre class="r"><code>library(ggtext)
+
+group.colors &lt;- c(Sokka = &quot;#1C3F6E&quot;, Aang = &quot;#EFFC93&quot;, Katara = &quot;#0F2347&quot;, Iroh = &quot;#a10000&quot;, Zuko = &quot;#a10000&quot;, Toph = &quot;#80C271&quot;) 
+
+p &lt;- df %&gt;% 
+  filter(character %in% top_chars) %&gt;% 
+  ggplot(aes(rating, word_perc)) +
+  geom_point(aes(color = character), alpha = 1, show.legend = FALSE) + 
+  stat_density_2d(alpha = .2, show.legend = FALSE) + 
+  scale_color_manual(values = group.colors) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  facet_wrap(~ character) + 
+  theme_minimal() + 
+  labs(
+    x = &quot;IMDB Rating&quot;,
+    y = &quot;&quot;,
+    title = &quot;&lt;span style=&#39;color:#a10000&#39;&gt;**Zuko**&lt;/span&gt;-heavy Episodes Maintain High Ratings&quot;, 
+    subtitle = &quot;Character Word Count / Total Word Count Per Each Episode&quot;, 
+    caption = &quot;Joseph Pope | @joepope44&quot;
+    ) + 
+  theme(
+    text = element_text(family = &quot;Verdana&quot;),
+    panel.background = element_rect(fill = &quot;lightgrey&quot;), 
+    panel.grid = element_blank(),
+    plot.title = element_markdown(size = 20),
+    strip.text = element_text(face = &quot;bold&quot;)
+    )
+
+p</code></pre>
+<p><img src="/blog/2020-08-11-avatar-the-last-airbender_files/figure-html/unnamed-chunk-6-1.png" width="1440" /></p>
 <p>I use a density 2D plot to help show how the points are distributed.</p>
 <p>I don’t think this came out quite as informative as I would have liked, but it is interesting to see that Zuko has several episodes where he is speaking the most out of all characters, and those all appear to have relatively high ratings.</p>
 </div>
