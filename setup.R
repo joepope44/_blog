@@ -1,3 +1,5 @@
-library(tidyverse)
+library(tidyverse, warn.conflict = FALSE, quietly = TRUE)
 library(extrafont)
 library(ggthemes)
+library(knitr)
+library(kableExtra, warn.conflict = FALSE, quietly = TRUE)

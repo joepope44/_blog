@@ -1,0 +1,183 @@
+---
+title: Endangered Plants
+author: Joseph Pope
+date: '2020-08-18'
+slug: endangered-plants
+categories:
+  - R
+tags:
+  - tidyverse
+comments: yes
+description: 'A TidyTuesday project exploring endangered plant life.'
+images:
+  - src: 'img/2020/tidytuesday/clearcut.jpg'
+    stretch: stretchH
+removeBlur: no
+---
+
+Today we are analyzing extinct and endangered plants for TidyTuesday. 
+
+Every week I find myself starting my research path at the truly excellent site [Data-to-Viz by Yan Holtz and Conor Healy](https://www.data-to-viz.com/) for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It's well worth a bookmark in your favorite browser. 
+
+This week's dataset has three tables, many of which have several columns/features and ways in which to cut up the data. I decided to try something I've never done before, and build a [Circular Barplot](https://www.data-to-viz.com/graph/circularbarplot.html). 
+
+The code is long and complicated. I do not recommend this for beginner's. However, the effect is pretty striking and it's a nice weapon to have in the belt. I was tempted to build a stacked circular bar chart, which is REALLY impressive, but for my first foray into polar coordinates, I decided to just do a grouped bar chart, which honestly was pretty tough on its own. 
+
+
+Setup 
+
+```
+# Contents of Setup.R. 
+# Using Source method to suppress warnings and messages from Rmd output
+
+# library(tidyverse)
+# library(extrafont)
+# library(ggthemes)
+# library(tidyverse)
+# library(knitr)
+# library(kableExtra)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+source('../../setup.R')
+
+# Contents of Setup.R. 
+# Using Source method to suppress warnings and messages from Rmd output
+
+# library(tidyverse)
+# library(extrafont)
+# library(ggthemes)
+# library(tidyverse)
+# library(knitr)
+# library(kableExtra)
+
+knitr::opts_chunk$set(
+	fig.height = 10,
+	fig.width = 10,
+	message = FALSE,
+	warning = FALSE,
+	dpi = 600
+)
+```
+
+
+# Load Data
+```{r}
+# tuesdata <- tidytuesdayR::tt_load('2020-08-18')
+
+# threats <- tuesdata$threats
+
+threats <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-18/threats.csv')
+```
+
+# Explore Data 
+```{r}
+skimr::skim(threats)
+```
+
+# Explore Data MORE
+```{r}
+table(threats$threat_type, threats$threatened)
+
+```
+
+# Data Processing
+```{r}
+
+data <- threats %>% 
+  filter(threatened == 1) %>% 
+  group_by(continent, country) %>% 
+  count(name = "threatened_plants", sort = TRUE) %>% 
+  ungroup() %>% 
+  mutate(continent = factor(continent),
+         country = ifelse(str_detect(country, "Saint Helena"), "Saint Helena", country),
+         threatened_plants = scales::rescale(threatened_plants, to = c(0, 100))) %>% 
+  filter(threatened_plants != 0)
+```
+
+# Plotting
+
+```{r}
+# Set a number of 'empty bar' to add at the end of each group
+empty_bar=3
+to_add = data.frame( matrix(NA, empty_bar*nlevels(data$continent), ncol(data)) )
+
+colnames(to_add) = colnames(data)
+to_add$continent = rep(levels(data$continent), each=empty_bar)
+
+data=rbind(data, to_add)
+data=data %>% arrange(continent)
+data$id=seq(1, nrow(data))
+
+
+# Get the name and the y position of each label
+label_data=data
+number_of_bar=nrow(label_data)
+angle= 90 - 360 * (label_data$id-0.5) /number_of_bar     # I substract 0.5 because the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust<-ifelse( angle < -90, 1, 0)
+label_data$angle<-ifelse(angle < -90, angle+180, angle)
+
+
+# prepare a data frame for base lines
+base_data=data %>% 
+  group_by(continent) %>% 
+  summarize(start=min(id), end=max(id) - empty_bar) %>% 
+  rowwise() %>% 
+  mutate(title=mean(c(start, end)))
+
+# prepare a data frame for grid (scales)
+grid_data = base_data
+grid_data$end = grid_data$end[ c( nrow(grid_data), 1:nrow(grid_data)-1)] + 1
+grid_data$start = grid_data$start - 1
+grid_data=grid_data[-1,]
+
+```
+
+
+# Build Plot
+
+```{r}
+
+p = ggplot(data, aes(x=as.factor(id), y=threatened_plants, fill=continent)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
+  
+  geom_bar(aes(x=as.factor(id), y=threatened_plants, fill=continent), stat="identity", alpha=0.5) +
+  
+  # Add a val=100/75/50/25 lines. I do it at the beginning to make sur barplots are OVER it.
+  geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  
+  # Add text showing the value of each 100/75/50/25 lines
+  annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  
+  geom_bar(aes(x=as.factor(id), y=threatened_plants, fill=continent), stat="identity", alpha=0.5) +
+  ylim(-100,120) +
+  labs(
+    title = "Number of Threatened Plants by Geo",
+    subtitle = "Scaled from 0-100",
+    caption = "Joseph Pope | @joepope44"
+  ) + 
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.title = element_text(hjust = 0.5, size = 24, family  = "Garamond"),
+    plot.subtitle = element_text(hjust = 0.5, family  = "Garamond"),
+    plot.caption = element_text(hjust = 0.5, family = "Garamond")
+    # plot.margin = unit(rep(-1,4), "cm") <- this hides the plot title if not commented out
+  ) +
+  coord_polar() + 
+  geom_text(data=label_data, aes(x=id, y=threatened_plants+10, label=country, hjust=hjust), color="black", fontface="bold",alpha=0.7, size=3.5, angle= label_data$angle, inherit.aes = FALSE ) +
+  
+  # Add base line information
+  geom_segment(data=base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
+  geom_text(data=base_data, aes(x = title, y = -18, label=continent),
+            hjust=c(1,1,.5,0,0,0), colour = "black", alpha=0.8, size=3, 
+            fontface="bold", inherit.aes = FALSE) 
+ 
+p
+```
+

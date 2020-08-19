@@ -6,10 +6,20 @@
     <description>Recent content in Blog on @joepope44</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 11 Aug 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 18 Aug 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Endangered Plants</title>
+      <link>/blog/endangered-plants/</link>
+      <pubDate>Tue, 18 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/endangered-plants/</guid>
+      <description>Today we are analyzing extinct and endangered plants for TidyTuesday.
+Every week I find myself starting my research path at the truly excellent site Data-to-Viz by Yan Holtz and Conor Healy for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It’s well worth a bookmark in your favorite browser.</description>
+    </item>
     
     <item>
       <title>Avatar: The Last Airbender</title>

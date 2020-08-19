@@ -4,7 +4,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -58,18 +58,13 @@
   </url>
   
   <url>
-    <loc>/blog/avatar-the-last-airbender/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/blog/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -123,13 +118,18 @@
   </url>
   
   <url>
+    <loc>/blog/endangered-plants/</loc>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories/r/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2020-08-11T00:00:00+00:00</lastmod>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -184,6 +184,11 @@
   
   <url>
     <loc>/tags/tidyverse/</loc>
+    <lastmod>2020-08-18T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/blog/avatar-the-last-airbender/</loc>
     <lastmod>2020-08-11T00:00:00+00:00</lastmod>
   </url>
   
