@@ -18,7 +18,8 @@
       
       <guid>/blog/endangered-plants/</guid>
       <description>Today we are analyzing extinct and endangered plants for TidyTuesday.
-Every week I find myself starting my research path at the truly excellent site Data-to-Viz by Yan Holtz and Conor Healy for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It’s well worth a bookmark in your favorite browser.</description>
+Every week I find myself utilizing the truly excellent site Data-to-Viz by Yan Holtz and Conor Healy for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It’s well worth a bookmark in your favorite browser.
+This week’s data set has three tables, many of which have several columns/features and ways in which to cut up the data.</description>
     </item>
     
     <item>

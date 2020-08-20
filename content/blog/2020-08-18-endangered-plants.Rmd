@@ -17,11 +17,11 @@ removeBlur: no
 
 Today we are analyzing extinct and endangered plants for TidyTuesday. 
 
-Every week I find myself starting my research path at the truly excellent site [Data-to-Viz by Yan Holtz and Conor Healy](https://www.data-to-viz.com/) for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It's well worth a bookmark in your favorite browser. 
+Every week I find myself utilizing the truly excellent site [Data-to-Viz by Yan Holtz and Conor Healy](https://www.data-to-viz.com/) for inspiration on what I want to try and learn with R. The site is interactive and helps you figure out the best visualization given numerical or categorical data. It's well worth a bookmark in your favorite browser. 
 
-This week's dataset has three tables, many of which have several columns/features and ways in which to cut up the data. I decided to try something I've never done before, and build a [Circular Barplot](https://www.data-to-viz.com/graph/circularbarplot.html). 
+This week's data set has three tables, many of which have several columns/features and ways in which to cut up the data. I decided to try something I've never done before, and build a [Circular Barplot](https://www.data-to-viz.com/graph/circularbarplot.html). 
 
-The code is long and complicated. I do not recommend this for beginner's. However, the effect is pretty striking and it's a nice weapon to have in the belt. I was tempted to build a stacked circular bar chart, which is REALLY impressive, but for my first foray into polar coordinates, I decided to just do a grouped bar chart, which honestly was pretty tough on its own. 
+The code is long and complicated. I do not recommend this for beginner's. However, the effect is pretty striking and it's a nice skill to learn. I was tempted to build a stacked circular bar chart, which is REALLY impressive, AND looks cool, but for my first foray into polar coordinates, I decided to just do a grouped bar chart, which was honestly pretty tough on its own. 
 
 
 Setup 
@@ -64,24 +64,33 @@ knitr::opts_chunk$set(
 # Load Data
 ```{r}
 # tuesdata <- tidytuesdayR::tt_load('2020-08-18')
-
 # threats <- tuesdata$threats
 
 threats <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-18/threats.csv')
 ```
 
 # Explore Data 
+
+I am a fan of the skmir package. This gives you a great overview of the size of your data, your missing values, mean rates, and a basic histogram to show the distribution of numerical data-type columns. 
+
 ```{r}
 skimr::skim(threats)
 ```
 
 # Explore Data MORE
+
+The Table function is an excellent EDA tool to compare one or two features. It's quick, it's easy, and it's effective. In this case, I want to check out threat types vs "threatened" plants. "Threatened" is a binary column (1 or 0) that shows if a plant is threatened with extinction or not. You can see very quickly that Agriculture and Aquaculture is the most common threat towards these plants. Note - there are 12 unique threat types, and 500 unique plants. 
+
 ```{r}
 table(threats$threat_type, threats$threatened)
-
 ```
 
 # Data Processing
+
+After some ideation and online research (again, let me plug [Data-to-Viz](https://www.data-to-viz.com/)) I decided to tackle a circular bar graph. Below I filter to look only at threatened plants, and count them by continent and country. 
+
+I decided to scale the count, between 0 and 100, but this was mainly done for expediency, as I wanted to better fit my data into the existing code "template" I used/borrowed/lifted/nicked from data-to-viz. This decision means that I lose the true count of threatened plants, but still keep the visual effect. The countries that have the most threatened plants per continent will still be evident. If I was doing this chart for a professional project, I would not scale here. The Saint Helena code is just to truncate a long country name. 
+
 ```{r}
 
 data <- threats %>% 
@@ -95,7 +104,15 @@ data <- threats %>%
   filter(threatened_plants != 0)
 ```
 
-# Plotting
+# Plotting Setup 
+
+There are a number of steps necessary to setup the data before plotting in a circular bar chart, with the clever grouped formatting strucutre. I kept the comments from the data-to-viz website, and added a few when worthwhile. 
+
+The steps are essentially to: 
+1. Create empty bar rows in the data to allow grouping 
+2. Build labels and add to data. In this case, we will label the country per bar and use continent for the grouping. Thankfully all the geometry was already calculated and I did not adjust it. 
+3. Base Data - Dataframe handles continent labelling and line arc aesthetics. 
+4. Grid Data - Dataframe handles the 0-20-40-60-80 bars. It basically acts as the y-axis label. 
 
 ```{r}
 # Set a number of 'empty bar' to add at the end of each group
@@ -136,6 +153,10 @@ grid_data=grid_data[-1,]
 
 # Build Plot
 
+I did not alter this code very much, except for variables (obv), the margin() in the theme function to allow the plot title to be displayed, and hjust() to fiddle with the alignment of the continent labels in the inner circle. 
+
+I hope this was helpful and good luck on your next project. 
+
 ```{r}
 
 p = ggplot(data, aes(x=as.factor(id), y=threatened_plants, fill=continent)) +       # Note that id is a factor. If x is numeric, there is some space between the first bar
@@ -143,13 +164,13 @@ p = ggplot(data, aes(x=as.factor(id), y=threatened_plants, fill=continent)) +   
   geom_bar(aes(x=as.factor(id), y=threatened_plants, fill=continent), stat="identity", alpha=0.5) +
   
   # Add a val=100/75/50/25 lines. I do it at the beginning to make sur barplots are OVER it.
-  geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data=grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
-  geom_segment(data=grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 80, xend = start, yend = 80), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 60, xend = start, yend = 60), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 40, xend = start, yend = 40), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_data, aes(x = end, y = 20, xend = start, yend = 20), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
   
   # Add text showing the value of each 100/75/50/25 lines
-  annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="grey", size=3 , angle=0, fontface="bold", hjust=1) +
+  annotate("text", x = rep(max(data$id),4), y = c(20, 40, 60, 80), label = c("20", "40", "60", "80") , color="white", size=3 , angle=0, fontface="bold", hjust=1) +
   
   geom_bar(aes(x=as.factor(id), y=threatened_plants, fill=continent), stat="identity", alpha=0.5) +
   ylim(-100,120) +
@@ -164,18 +185,19 @@ p = ggplot(data, aes(x=as.factor(id), y=threatened_plants, fill=continent)) +   
     axis.text = element_blank(),
     axis.title = element_blank(),
     panel.grid = element_blank(),
+    plot.background = element_rect(fill = "#a3b18a"),
     plot.title = element_text(hjust = 0.5, size = 24, family  = "Garamond"),
     plot.subtitle = element_text(hjust = 0.5, family  = "Garamond"),
     plot.caption = element_text(hjust = 0.5, family = "Garamond")
     # plot.margin = unit(rep(-1,4), "cm") <- this hides the plot title if not commented out
   ) +
-  coord_polar() + 
+  coord_polar() + # This makes the circle! 
   geom_text(data=label_data, aes(x=id, y=threatened_plants+10, label=country, hjust=hjust), color="black", fontface="bold",alpha=0.7, size=3.5, angle= label_data$angle, inherit.aes = FALSE ) +
   
   # Add base line information
   geom_segment(data=base_data, aes(x = start, y = -5, xend = end, yend = -5), colour = "black", alpha=0.8, size=0.6 , inherit.aes = FALSE )  +
   geom_text(data=base_data, aes(x = title, y = -18, label=continent),
-            hjust=c(1,1,.5,0,0,0), colour = "black", alpha=0.8, size=3, 
+            hjust=c(1,1,.5,0,0,0), colour = "black", alpha=0.8, size=4, 
             fontface="bold", inherit.aes = FALSE) 
  
 p
