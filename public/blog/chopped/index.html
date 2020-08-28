@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8">
+<title>Chopped - @joepope44</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png?v=1">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png?v=1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png?v=1">
+  <link rel="manifest" href="/favicon/site.webmanifest?v=1">
+  
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg?v=1" color="#ffffff">
+    <link rel="shortcut icon" href="/favicon/favicon.ico?v=1">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml?v=1">
+  
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="theme-color" content="#ffffff">
+
+<meta name="generator" content="Hugo 0.72.0" /><meta itemprop="name" content="Chopped">
+<meta itemprop="description" content="This week we are looking at data from the Food Network’s cooking show “Chopped”. I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz.
+I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there.">
+<meta itemprop="datePublished" content="2020-08-26T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-08-26T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1120">
+<meta itemprop="image" content="">
+
+
+
+<meta itemprop="keywords" content="tidyverse," /><meta property="og:title" content="Chopped" />
+<meta property="og:description" content="This week we are looking at data from the Food Network’s cooking show “Chopped”. I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz.
+I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/blog/chopped/" />
+<meta property="og:image" content="" />
+<meta property="article:published_time" content="2020-08-26T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-08-26T00:00:00+00:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content=""/>
+
+<meta name="twitter:title" content="Chopped"/>
+<meta name="twitter:description" content="This week we are looking at data from the Food Network’s cooking show “Chopped”. I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz.
+I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there."/>
+<meta name="twitter:site" content="@joepope44"/>
+<link rel="stylesheet" href="/css/bundle.min.d9e04ae08c9b3049b766dbd4aeab7d862c5ea1d13679b621490e0f5df5507497.css" integrity="sha256-2eBK4IybMEm3ZtvUrqt9hixeodE2ebYhSQ4PXfVQdJc="><link rel="stylesheet" href="/css/add-on.css">
+</head>
+
+  <body>
+    
+
+<header id="site-header">
+  <nav id="site-nav">
+    <h1 class="nav-title">
+      <a href="/" class="nav">
+        
+          Blog
+        
+      </a>
+    </h1>
+    <menu id="site-nav-menu" class="flyout-menu menu">
+      
+        
+          
+          <a href="/" class="nav link"><i class='fa fa-home'></i> Home</a>
+        
+      
+        
+          
+          <a href="/about/" class="nav link"><i class='far fa-id-card'></i> About</a>
+        
+      
+        
+          
+          <a href="/blog/" class="nav link"><i class='far fa-newspaper'></i> Blog</a>
+        
+      
+        
+          
+          <a href="/categories/" class="nav link"><i class='fas fa-sitemap'></i> Categories</a>
+        
+      
+        
+          
+          <a href="/contact/" class="nav link"><i class='far fa-envelope'></i> Contact</a>
+        
+      
+      <a href="#share-menu" class="nav link share-toggle"><i class="fas fa-share-alt">&nbsp;</i>Share</a>
+      <a href="#search-input" class="nav link search-toggle"><i class="fas fa-search">&nbsp;</i>Search</a>
+    </menu>
+    <a href="#search-input" class="nav search-toggle"><i class="fas fa-search fa-2x">&nbsp;</i></a>
+    <a href="#share-menu" class="nav share-toggle"><i class="fas fa-share-alt fa-2x">&nbsp;</i></a>
+    <a href="#lang-menu" class="nav lang-toggle" lang="en">en</a>
+    <a href="#site-nav" class="nav nav-toggle"><i class="fas fa-bars fa-2x"></i></a>
+  </nav>
+  <menu id="search" class="menu"><input id="search-input" class="search-input menu"></input><div id="search-results" class="search-results menu"></div></menu>
+  <menu id="lang-menu" class="flyout-menu menu">
+  <a href="#" lang="en" class="nav link active">English (en)</a>
+  
+    
+      
+    
+      
+        <a href="/fr" lang="fr" class="nav no-lang link">Français (fr)</a>
+      
+    
+      
+        <a href="/pl" lang="pl" class="nav no-lang link">Polski (pl)</a>
+      
+    
+      
+        <a href="/pt" lang="pt" class="nav no-lang link">Português (pt)</a>
+      
+    
+      
+        <a href="/de" lang="de" class="nav no-lang link">Deutsche (de)</a>
+      
+    
+      
+        <a href="/es" lang="es" class="nav no-lang link">Española (es)</a>
+      
+    
+      
+        <a href="/zh-cn" lang="zh-cn" class="nav no-lang link">中文 (zh-cn)</a>
+      
+    
+      
+        <a href="/zh-tw" lang="zh-tw" class="nav no-lang link">中文 (zh-tw)</a>
+      
+    
+      
+        <a href="/ja" lang="ja" class="nav no-lang link">日本語 (ja)</a>
+      
+    
+      
+        <a href="/nl" lang="nl" class="nav no-lang link">Nederlands (nl)</a>
+      
+    
+  
+</menu>
+
+  
+    <menu id="share-menu" class="flyout-menu menu">
+      <h1>Share Post</h1>
+      
+
+
+
+
+  
+    
+    <a href="//twitter.com/share?text=Chopped&amp;url=%2fblog%2fchopped%2f" target="_blank" rel="noopener" class="nav share-btn twitter">
+        <p>Twitter</p>
+      </a>
+  
+
+  
+      <a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2fchopped%2f" target="_blank" rel="noopener" class="nav share-btn facebook">
+        <p>Facebook</p>
+        </a>
+  
+
+  
+    <a href="//www.reddit.com/submit?url=%2fblog%2fchopped%2f&amp;title=Chopped" target="_blank" rel="noopener" class="nav share-btn reddit">
+          <p>Reddit</p>
+        </a>
+  
+
+  
+        <a href="//www.linkedin.com/shareArticle?url=%2fblog%2fchopped%2f&amp;title=Chopped" target="_blank" rel="noopener" class="nav share-btn linkedin">
+            <p>LinkedIn</p>
+          </a>
+  
+
+  
+        <a href="//www.pinterest.com/pin/create/button/?url=%2fblog%2fchopped%2f&amp;description=Chopped" target="_blank" rel="noopener" class="nav share-btn pinterest">
+          <p>Pinterest</p>
+        </a>
+  
+
+  
+        <a href="mailto:?subject=Check%20out%20this%20post%20by Joseph%20Pope&amp;body=%2fblog%2fchopped%2f" target="_blank" class="nav share-btn email" data-proofer-ignore>
+          <p>Email</p>
+        </a>
+  
+
+
+    </menu>
+  
+</header>
+
+    <div id="wrapper">
+      <section id="site-intro" >
+  <a href="/"><img src="/img/main/joe.jpg" class="hexagon" width="100" alt="" /></a>
+  <header>
+    <h1>Data Science :: Analytics :: Visualizations</h1>
+  </header>
+  <main>
+    <p>By Joseph Pope</p>
+  </main>
+  
+    <footer>
+      <ul class="socnet-icons">
+        
+
+        <li><a href="//github.com/joepope44" target="_blank" rel="noopener" title="GitHub" class="fab fa-github"></a></li>
+
+<li><a href="//stackoverflow.com/users/1908833" target="_blank" rel="noopener" title="Stack Overflow" class="fab fa-stack-overflow"></a></li>
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/josephwpope" target="_blank" rel="noopener" title="LinkedIn" class="fab fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/joepope44" target="_blank" rel="noopener" title="Twitter" class="fab fa-twitter"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="mailto:joepope44@gmail.com" target="_blank" title="Email" class="far fa-envelope"></a></li>
+
+      </ul>
+    </footer>
+  
+</section>
+
+      <main id="site-main">
+        
+  <article class="post">
+    <header>
+  <div class="title">
+    
+      <h2><a href="/blog/chopped/">Chopped</a></h2>
+    
+    
+  </div>
+  <div class="meta">
+    <time datetime="2020-08-26 00:00:00 &#43;0000 UTC">August 26, 2020</time>
+    <p>Joseph Pope</p>
+    <p>6-Minute Read</p>
+  </div>
+</header>
+
+    <div id="socnet-share">
+      
+
+
+
+
+  
+    
+    <a href="//twitter.com/share?text=Chopped&amp;url=%2fblog%2fchopped%2f" target="_blank" rel="noopener" class="nav share-btn twitter">
+        <p>Twitter</p>
+      </a>
+  
+
+  
+      <a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2fchopped%2f" target="_blank" rel="noopener" class="nav share-btn facebook">
+        <p>Facebook</p>
+        </a>
+  
+
+  
+    <a href="//www.reddit.com/submit?url=%2fblog%2fchopped%2f&amp;title=Chopped" target="_blank" rel="noopener" class="nav share-btn reddit">
+          <p>Reddit</p>
+        </a>
+  
+
+  
+        <a href="//www.linkedin.com/shareArticle?url=%2fblog%2fchopped%2f&amp;title=Chopped" target="_blank" rel="noopener" class="nav share-btn linkedin">
+            <p>LinkedIn</p>
+          </a>
+  
+
+  
+        <a href="//www.pinterest.com/pin/create/button/?url=%2fblog%2fchopped%2f&amp;description=Chopped" target="_blank" rel="noopener" class="nav share-btn pinterest">
+          <p>Pinterest</p>
+        </a>
+  
+
+  
+        <a href="mailto:?subject=Check%20out%20this%20post%20by Joseph%20Pope&amp;body=%2fblog%2fchopped%2f" target="_blank" class="nav share-btn email" data-proofer-ignore>
+          <p>Email</p>
+        </a>
+  
+
+
+    </div>
+    <div class="content">
+      <a href="/blog/chopped/" class="image" style="--bg-image: url('/img/2020/tidytuesday/cooked.jpg');">
+    <img src="/img/2020/tidytuesday/cooked.jpg" alt="">
+  </a>
+      
+
+
+<p>This week we are looking at data from the Food Network’s cooking show “Chopped”. I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz.</p>
+<p>I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there.</p>
+<p>So that fact isn’t that interesting for an analysis. But I was curious which city had the most cooks on the show, per capita. In other words, which city is ‘punching above their weight’? I had a hunch that it might be Portland, Maine, which apparently has the most restaurants per square mile in the country.</p>
+<blockquote>
+<p>Brief sidenote. My wife and I were married in Portland, Maine and our head chef, Matt Ginn, was actually on Chopped! (Room for ’Shrooms episode) If you ever go to Portland, please try Evo. It is truly outstanding.</p>
+</blockquote>
+<p>OK now I’m getting hungry. Let’s dive in.</p>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<pre><code># library(tidyverse)
+# library(extrafont)
+# library(ggthemes)
+# library(tidyverse)
+# library(knitr)
+# library(kableExtra)</code></pre>
+</div>
+<div id="load-data" class="section level1">
+<h1>Load Data</h1>
+<p>I am trying something new here where I save the data locally and store in content/blog folder instead of pinging github everytime I rebuild the site with blogdown. Seems friendlier to do this, at the least.</p>
+<pre class="r"><code># chopped &lt;- readr::read_tsv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-08-25/chopped.tsv&#39;)
+
+# write_csv(chopped, &quot;chopped.csv&quot;)
+
+chopped &lt;- read_csv(&quot;chopped.csv&quot;)</code></pre>
+</div>
+<div id="manipulate-data" class="section level1">
+<h1>Manipulate Data</h1>
+<p>Here I attempt to stack the contestant info, using the tidy long form instead of wide. The data are stored as four columns, like contestant1:contestant4, and then each contestant has some info about them, in columns like contestant_info1:contestant_info4. The location data I want is in that info column.</p>
+<p>I could not figure out how to do one <code>pivot_longer</code> command, which in theory would have solved this problem. Please chime in if you see how to do this. Instead, I created two dataframes, one with the contestant name data and one with the contestant info data, and binded the columns together. I kept the episode info in case I needed to filter out certain episodes, like kid/teen centric, celebrity charities, or tournaments. I was unable to set the names of the new columns within the <code>bind_cols</code> function, which seemed odd. I was able to handle using <code>rename</code> easily enough.</p>
+<pre class="r"><code>contestants &lt;- chopped %&gt;% 
+  select(episode_name, episode_notes, contestant1:contestant4_info) 
+
+info &lt;- select(contestants, starts_with(&quot;episode&quot;), ends_with(&quot;_info&quot;)) %&gt;% 
+  pivot_longer(cols = contains(&quot;contestant&quot;))
+
+conts &lt;- select(contestants, starts_with(&quot;episode&quot;), !ends_with(&quot;_info&quot;)) %&gt;% 
+  pivot_longer(cols = contains(&quot;contestant&quot;)) %&gt;% 
+  bind_cols(select(info, value)) %&gt;% 
+  rename(&quot;contestant_name&quot; = &quot;value...4&quot;, &quot;contestant_info&quot; = &quot;value...5&quot;)</code></pre>
+</div>
+<div id="clean-the-data" class="section level1">
+<h1>Clean the Data</h1>
+<p>First step here is to filter out the childrens, using regex “^age”, as that is the prefix for every minor contestant. I only want to look at professional chefs. Turns out only the professional chef contestants have their city name included, so this saved me some steps.</p>
+<blockquote>
+<p>TIL: You can use str_squish to get rid of whitespace in the middle of the string. Similar to str_trim. This fixed location data which had an extra space: ex.(“New York NY”).</p>
+</blockquote>
+<p>Next I had to parse the location data from the info. The challenge here is that some entries have “contestant x is from New York, NY”. This is great, I could just use regex to extract everything after the from. BUT other entries just have “contestant x San Fransisco, CA”. So I would need some clever regex to handle both cases. I honestly couldn’t figure out how to do that. So I hatched a plan B.</p>
+<p>Using the <code>maps</code> package, I could pull in a list of verified US city names, formatted, and with population data, which I need anyway! Perfect! One issue is that even though this package has 1005 entries for US cities, it is missing a few because the Chopped data uses boroughs like Brooklyn, NY and Queens, NY instead of lumping them into New York City. If anything, I am actually undercounting the number of cooks from the NYC region! So one big caveat here is that my data is very likely missing suburbs or nearby towns to many other cities.</p>
+<p>To get the location data, I need to iterate through each city of us.cities$name, and see if there is a match in the contestant_info field. I struggled for a while with map and str_extract, but couldn’t get it to work. A kind soul at reddit eventually set me up with working code. In order to make this work, I needed to discard NA (no matches). I don’t think I ever would have figured that out. The data is stored as a list in each record, so then I just have to <code>unnest</code>, drop NAs, and de-duplicate the contestant names so I’m not double-counting anyone who was on the show more than once.</p>
+<pre class="r"><code>cities &lt;- maps::us.cities$name
+
+clean &lt;- conts %&gt;% 
+  filter(!str_detect(contestant_info, &quot;^age&quot;)) %&gt;% 
+  mutate(contestant_info = str_squish(contestant_info))
+
+extract_cities &lt;- function(x, cities) {
+  y &lt;- discard(str_extract(x, coll(cities)), is.na)
+  if(length(y) == 0L) y &lt;- y[!is.na(y)]
+  return(y)
+}
+
+clean$location &lt;- map(clean$contestant_info, extract_cities, cities)
+
+clean &lt;- clean %&gt;% 
+  unnest(location) %&gt;% 
+  drop_na(location) %&gt;% 
+  distinct(contestant_name, location, .keep_all = TRUE) </code></pre>
+<p>Here I create a counting table and calculate the ‘cooks per capita’ metric.</p>
+<pre class="r"><code>uscities &lt;- tibble(maps::us.cities)
+
+clean2 &lt;- clean %&gt;% 
+  count(location, name = &quot;cook_count&quot;, sort=TRUE) %&gt;% 
+  left_join(select(uscities, name, pop), by = c(&quot;location&quot; = &quot;name&quot;)) %&gt;% 
+  mutate(per_capita = cook_count / pop * 1000) %&gt;% 
+  arrange(-per_capita)</code></pre>
+</div>
+<div id="plotting" class="section level1">
+<h1>Plotting</h1>
+<p>The <code>fct_reorder</code> function is pretty much essential to use with sideways bar charts like this. Hat tip to David Robinson who uses it often. I try to do something kind of fancy with this bar chart, where I show the number of cooks per city in a bubble using geom_label before the actual bar chart which shows ‘cooks per capita’. I doubt I used the best method to space this out. This is a common issue I have with ggplot. I need to spend more time understanding how the plot is displayed, and how to effectively traverse the plot in order to place grobs (graphical objects) properly.</p>
+<pre class="r"><code>clean2 %&gt;% 
+  top_n(per_capita, n=20) %&gt;% 
+  mutate(location = fct_reorder(location, per_capita)) %&gt;% 
+  ggplot(aes(location, per_capita)) + 
+  geom_label(aes(y = 0, label=cook_count), 
+             color=&quot;darkgrey&quot;, 
+             hjust = .7,
+             nudge_y = -.008,
+             label.r = unit(.5, &quot;lines&quot;)) +
+  geom_col(aes(fill=location), show.legend = FALSE) + 
+  coord_flip() + 
+  labs(
+    x = &#39;&#39;,
+    y = &#39;&#39;,
+    title = &#39;Portland, Maine With Most Cooks Per Capita&#39;,
+    subtitle = &quot;But only 13 cooks, compared to NYC&#39;s 516&quot;,
+    caption = &#39;Joseph Pope | @joepope44&#39;
+  ) + 
+  ggthemes::theme_fivethirtyeight() + 
+  theme(
+    text = element_text(family = &quot;Garamond&quot;),
+    axis.title.y = element_text(size = 14),
+    plot.title.position = &quot;plot&quot;,
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  ) + 
+  scale_fill_viridis_d(option = &quot;E&quot;, direction = -1)</code></pre>
+<p><img src="/blog/2020-08-26-chopped.en_files/figure-html/unnamed-chunk-6-1.png" width="4800" /></p>
+<p>All in all, fairly happy with how this came out. Sure enough, Portland, Maine is at the top.</p>
+</div>
+
+    </div>
+    <footer>
+      <div class="stats">
+  
+    <ul class="categories">
+      
+        
+          <li><a class="article-terms-link" href="/categories/r/">R</a></li>
+        
+      
+    </ul>
+  
+  
+    <ul class="tags">
+      
+        
+          <li><a class="article-terms-link" href="/tags/tidyverse/">tidyverse</a></li>
+        
+      
+    </ul>
+  
+</div>
+
+    </footer>
+  </article>
+  
+    
+  <article class="post">
+    
+    <div>
+      <h2 id="say-something">Say Something</h2>
+        <form id="comment-form" class="new-comment" method="POST">
+          
+          <h3 class='reply-notice hidden'>
+            <span class='reply-name'></span>
+          </h3>
+
+          
+          <input type="hidden" name="options[entryId]" value="3035cb63d9fa348cc25af948311cd1a8">
+          <input type='hidden' name='fields[replyThread]' value=''>
+          <input type='hidden' name='fields[replyID]' value=''>
+          <input type='hidden' name='fields[replyName]' value=''>
+
+          
+          <input required name='fields[name]' type='text' placeholder='Your Name'>
+          <input name='fields[website]' type='text' placeholder='Your Website'>
+          <input required name='fields[email]' type='email' placeholder='Your Email'>
+          <textarea required name='fields[body]' placeholder='Your Message' rows='10'></textarea>
+
+          
+          
+
+          
+          <div class='submit-notice'>
+            <strong class='submit-notice-text submit-success hidden'>Thanks for your comment! It will be shown on the site once it has been approved.</strong>
+            <strong class='submit-notice-text submit-failed hidden'>Sorry, there was an error with your submission. Please make sure all required fields have been completed and try again.</strong>
+          </div>
+
+          
+          <input type='submit' value='Submit' class='button'>
+          <input type='submit' value='Submitted' class='hidden button' disabled>
+          <input type='reset' value='Reset' class='button'>
+        </form>
+    </div>
+
+    
+    <div>
+      <h2>Comments</h2><p>Nothing yet.</p>
+      
+    </div>
+  </article>
+
+
+  
+  <div class="pagination">
+    
+    
+      <a href="/blog/endangered-plants/" class="button right"><span>Endangered Plants</span></a>
+    
+  </div>
+
+      </main>
+      <section id="site-sidebar">
+  
+    <section id="recent-posts">
+      <header>
+        <h1>Recent Posts</h1>
+      </header>
+      
+      <article class="mini-post">
+          <a href="/blog/chopped/" class="image" style="--bg-image: url('/img/2020/tidytuesday/cooked.jpg');">
+    <img src="/img/2020/tidytuesday/cooked.jpg" alt="">
+  </a>
+        <header>
+          <h2><a href="/blog/chopped/">Chopped</a></h2>
+          <time class="published" datetime="2020-08-26 00:00:00 &#43;0000 UTC">August 26, 2020</time>
+        </header>
+      </article>
+      
+      <article class="mini-post">
+          <a href="/blog/endangered-plants/" class="image" style="--bg-image: url('/img/2020/tidytuesday/clearcut.jpg');">
+    <img class="" src="/img/2020/tidytuesday/clearcut.jpg" alt="">
+  </a>
+        <header>
+          <h2><a href="/blog/endangered-plants/">Endangered Plants</a></h2>
+          <time class="published" datetime="2020-08-18 00:00:00 &#43;0000 UTC">August 18, 2020</time>
+        </header>
+      </article>
+      
+      <article class="mini-post">
+          <a href="/blog/avatar-the-last-airbender/" class="image" style="--bg-image: url('/img/2020/tidytuesday/avatar.jpg');">
+    <img src="/img/2020/tidytuesday/avatar.jpg" alt="">
+  </a>
+        <header>
+          <h2><a href="/blog/avatar-the-last-airbender/">Avatar: The Last Airbender</a></h2>
+          <time class="published" datetime="2020-08-11 00:00:00 &#43;0000 UTC">August 11, 2020</time>
+        </header>
+      </article>
+      
+      <article class="mini-post">
+          <a href="/blog/coffee-ratings/" class="image" style="--bg-image: url('/img/2020/tidytuesday/small_coffee.jpg');">
+    <img src="/img/2020/tidytuesday/small_coffee.jpg" alt="Giant Cup O&#39; Joe">
+  </a>
+        <header>
+          <h2><a href="/blog/coffee-ratings/">Coffee Ratings</a></h2>
+          <time class="published" datetime="2020-07-07 00:00:00 &#43;0000 UTC">July 7, 2020</time>
+        </header>
+      </article>
+      
+      
+    </section>
+  
+
+  
+    
+      <section id="categories">
+        <header>
+          <h1><a href="/categories">categories</a></h1>
+        </header>
+        <ul>
+          
+          
+          <li>
+              <a href="/categories/r/">r<span class="count">4</span></a>
+          
+          </li>
+        </ul>
+      </section>
+    
+  
+
+  
+    <section id="mini-bio">
+      <header>
+        <h1>About</h1>
+      </header>
+      <p>BI and Data Science Content</p>
+      <footer>
+        <a href="/about" class="button">Learn More</a>
+      </footer>
+    </section>
+  
+</section>
+
+      <footer id="site-footer">
+  
+      <ul class="socnet-icons">
+        
+
+        <li><a href="//github.com/joepope44" target="_blank" rel="noopener" title="GitHub" class="fab fa-github"></a></li>
+
+<li><a href="//stackoverflow.com/users/1908833" target="_blank" rel="noopener" title="Stack Overflow" class="fab fa-stack-overflow"></a></li>
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/josephwpope" target="_blank" rel="noopener" title="LinkedIn" class="fab fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//twitter.com/joepope44" target="_blank" rel="noopener" title="Twitter" class="fab fa-twitter"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="mailto:joepope44@gmail.com" target="_blank" title="Email" class="far fa-envelope"></a></li>
+
+      </ul>
+  
+  <p class="copyright">
+    © 2020 @joepope44
+      <br>
+    Theme: <a href='https://github.com/pacollins/hugo-future-imperfect-slim' target='_blank' rel='noopener'>Hugo Future Imperfect Slim</a><br>A <a href='https://html5up.net/future-imperfect' target='_blank' rel='noopener'>HTML5 UP port</a> | Powered by <a href='https://gohugo.io/' title='0.72.0' target='_blank' rel='noopener'>Hugo</a>
+  </p>
+</footer>
+<a id="back-to-top" href="#" class="fas fa-arrow-up fa-2x"></a>
+
+      <script src="/js/highlight.js"></script>
+    
+    <script>hljs.initHighlightingOnLoad();</script><script src="/js/bundle.min.19fc9311fde10ff75d46a07056c1a78674224ea5da06e675f5b601bb20eb7594.js" integrity="sha256-GfyTEf3hD/ddRqBwVsGnhnQiTqXaBuZ19bYBuyDrdZQ="></script>
+    <script src="/js/add-on.js"></script>
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-175691901-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+    </div>
+  </body>
+</html>
