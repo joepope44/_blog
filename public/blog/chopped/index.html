@@ -22,7 +22,7 @@
 <meta itemprop="description" content="A TidyTuesday project analyzing Chopped chef contestant location data.">
 <meta itemprop="datePublished" content="2020-08-26T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2020-08-26T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="1120">
+<meta itemprop="wordCount" content="1253">
 <meta itemprop="image" content="">
 
 
@@ -319,10 +319,10 @@
 
 
 <p>This week we are looking at data from the Food Network’s cooking show “Chopped”. I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz.</p>
-<p>I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there.</p>
-<p>So that fact isn’t that interesting for an analysis. But I was curious which city had the most cooks on the show, per capita. In other words, which city is ‘punching above their weight’? I had a hunch that it might be Portland, Maine, which apparently has the most restaurants per square mile in the country.</p>
+<p>I noticed that some contestant records in the data set contained the hometown or home “base” of the Chef. The overwhelming majority are from New York City, no doubt because of the massive number of restaurants and also because the show is filmed there.</p>
+<p>So that fact did not seem that interesting for an analysis. But I was curious which city had the most cooks on the show, per capita. In other words, which city is ‘punching above their weight’? I had a hunch that it might be Portland, Maine, which apparently has the most restaurants per square mile in the country.</p>
 <blockquote>
-<p>Brief sidenote. My wife and I were married in Portland, Maine and our head chef, Matt Ginn, was actually on Chopped! (Room for ’Shrooms episode) If you ever go to Portland, please try Evo. It is truly outstanding.</p>
+<p>Brief sidenote. My wife and I were married in Portland, Maine and our head chef, Matt Ginn, was actually on Chopped! (Room for ’Shrooms episode) If you ever go to Portland, please try <a href="http://www.evoportland.com/">Evo</a>. It is truly outstanding.</p>
 </blockquote>
 <p>OK now I’m getting hungry. Let’s dive in.</p>
 <div id="setup" class="section level1">
@@ -341,12 +341,28 @@
 
 # write_csv(chopped, &quot;chopped.csv&quot;)
 
-chopped &lt;- read_csv(&quot;chopped.csv&quot;)</code></pre>
+chopped &lt;- read_csv(&quot;chopped.csv&quot;)
+
+head(chopped)</code></pre>
+<pre><code>## # A tibble: 6 x 21
+##   season season_episode series_episode episode_rating episode_name episode_notes
+##    &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        
+## 1      1              1              1            9.2 Octopus, Du… This is the …
+## 2      1              2              2            8.8 Tofu, Blueb… This is the …
+## 3      1              3              3            8.9 Avocado, Ta… &lt;NA&gt;         
+## 4      1              4              4            8.5 Banana, Col… In the appet…
+## 5      1              5              5            8.8 Yucca, Wate… &lt;NA&gt;         
+## 6      1              6              6            8.5 Canned Peac… &lt;NA&gt;         
+## # … with 15 more variables: air_date &lt;chr&gt;, judge1 &lt;chr&gt;, judge2 &lt;chr&gt;,
+## #   judge3 &lt;chr&gt;, appetizer &lt;chr&gt;, entree &lt;chr&gt;, dessert &lt;chr&gt;,
+## #   contestant1 &lt;chr&gt;, contestant1_info &lt;chr&gt;, contestant2 &lt;chr&gt;,
+## #   contestant2_info &lt;chr&gt;, contestant3 &lt;chr&gt;, contestant3_info &lt;chr&gt;,
+## #   contestant4 &lt;chr&gt;, contestant4_info &lt;chr&gt;</code></pre>
 </div>
 <div id="manipulate-data" class="section level1">
 <h1>Manipulate Data</h1>
 <p>Here I attempt to stack the contestant info, using the tidy long form instead of wide. The data are stored as four columns, like contestant1:contestant4, and then each contestant has some info about them, in columns like contestant_info1:contestant_info4. The location data I want is in that info column.</p>
-<p>I could not figure out how to do one <code>pivot_longer</code> command, which in theory would have solved this problem. Please chime in if you see how to do this. Instead, I created two dataframes, one with the contestant name data and one with the contestant info data, and binded the columns together. I kept the episode info in case I needed to filter out certain episodes, like kid/teen centric, celebrity charities, or tournaments. I was unable to set the names of the new columns within the <code>bind_cols</code> function, which seemed odd. I was able to handle using <code>rename</code> easily enough.</p>
+<p>I could not figure out how to do this in one <code>pivot_longer</code> command, which in theory would have solved this problem. Please chime in if you see how to do this. Instead, I created two dataframes, one with the contestant name data and one with the contestant info data, and binded the columns together. I kept the episode info in case I needed to filter out certain episodes, like kid/teen centric, celebrity charities, or tournaments. I was unable to set the names of the new columns within the <code>bind_cols</code> function, which seemed odd. I was able to handle using <code>rename</code> easily enough.</p>
 <pre class="r"><code>contestants &lt;- chopped %&gt;% 
   select(episode_name, episode_notes, contestant1:contestant4_info) 
 

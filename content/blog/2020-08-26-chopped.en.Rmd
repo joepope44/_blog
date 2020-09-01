@@ -16,11 +16,11 @@ removeBlur: no
 
 This week we are looking at data from the Food Network's cooking show "Chopped". I decided to focus more on the data analysis portion of the project and just use a simple bar chart for my viz. 
 
-I noticed that some contestant records in the data set contained the hometown or home "base" of the Chef. The overwhelming majority are from New York City, perhaps not that surprisingly because of all the restaurants and also that the show is filmed there. 
+I noticed that some contestant records in the data set contained the hometown or home "base" of the Chef. The overwhelming majority are from New York City, no doubt because of the massive number of restaurants and also because the show is filmed there. 
 
-So that fact isn't that interesting for an analysis. But I was curious which city had the most cooks on the show, per capita. In other words, which city is 'punching above their weight'? I had a hunch that it might be Portland, Maine, which apparently has the most restaurants per square mile in the country. 
+So that fact did not seem that interesting for an analysis. But I was curious which city had the most cooks on the show, per capita. In other words, which city is 'punching above their weight'? I had a hunch that it might be Portland, Maine, which apparently has the most restaurants per square mile in the country. 
 
-> Brief sidenote. My wife and I were married in Portland, Maine and our head chef, Matt Ginn, was actually on Chopped! (Room for 'Shrooms episode) If you ever go to Portland, please try Evo. It is truly outstanding. 
+> Brief sidenote. My wife and I were married in Portland, Maine and our head chef, Matt Ginn, was actually on Chopped! (Room for 'Shrooms episode) If you ever go to Portland, please try [Evo](http://www.evoportland.com/). It is truly outstanding. 
 
 OK now I'm getting hungry. Let's dive in. 
 
@@ -68,7 +68,7 @@ I am trying something new here where I save the data locally and store in conten
 
 chopped <- read_csv("chopped.csv")
 
-
+head(chopped)
 ```
 
 
@@ -76,7 +76,7 @@ chopped <- read_csv("chopped.csv")
 
 Here I attempt to stack the contestant info, using the tidy long form instead of wide. The data are  stored as four columns, like contestant1:contestant4, and then each contestant has some info about them, in columns like contestant_info1:contestant_info4. The location data I want is in that info column. 
 
-I could not figure out how to do one `pivot_longer` command, which in theory would have solved this problem. Please chime in if you see how to do this. Instead, I created two dataframes, one with the contestant name data and one with the contestant info data, and binded the columns together. I kept the episode info in case I needed to filter out certain episodes, like kid/teen centric, celebrity charities, or tournaments. I was unable to set the names of the new columns within the `bind_cols` function, which seemed odd. I was able to handle using `rename` easily enough. 
+I could not figure out how to do this in one `pivot_longer` command, which in theory would have solved this problem. Please chime in if you see how to do this. Instead, I created two dataframes, one with the contestant name data and one with the contestant info data, and binded the columns together. I kept the episode info in case I needed to filter out certain episodes, like kid/teen centric, celebrity charities, or tournaments. I was unable to set the names of the new columns within the `bind_cols` function, which seemed odd. I was able to handle using `rename` easily enough. 
 
 ```{r}
 
